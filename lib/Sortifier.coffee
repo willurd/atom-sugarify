@@ -1,8 +1,6 @@
-REQUIRE_REGEX = /(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!]+)!)?(.+)['"]\s*\)\s*;?/
+REQUIRE_REGEX = /(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
 REQUIRE_GLOBAL_REGEX = new RegExp(REQUIRE_REGEX.source, 'g')
-REQUIRE_BLOCK_REGEX = new RegExp("(\\s*#{REQUIRE_REGEX.source}\\s*)+", 'm')
-
-console.log(REQUIRE_BLOCK_REGEX.source)
+REQUIRE_BLOCK_REGEX = new RegExp("(\\s*#{REQUIRE_REGEX.source})+", 'm')
 
 getName = (line) ->
   match = line.match(REQUIRE_REGEX)
@@ -62,32 +60,6 @@ class Sortifier
       return  1 if aGroup > bGroup
       return  0
 
-    # groups.forEach (group) ->
-    #   console.group getBaseDirectory(group[0])
-    #   group.forEach (item) ->
-    #     console.log item
-    #   console.groupEnd()
-
     return groups.map(groupFormatter).join('\n\n')
-
-
-  #   def format_groups(groups, sep = '\n\n'):
-  #     return sep.join(map(lambda group: '\n'.join(group[1]), groups))
-  #
-  #   def group_reducer(acc, item):
-  #     key, lst = item
-  #     acc[key] += lst
-  #     return acc
-  #
-  #   groups = [(key, list(group)) for key, group in groupby(lines, base_dir_key)]
-  #
-  #   # groupby was not properly grouping items (sometimes).
-  #   groups = list(reduce(group_reducer, groups, defaultdict(lambda: [])).items())
-  #   groups.sort(key = group_sort_key)
-  #
-  #   named = list(filter(lambda group: group[0], groups))
-  #   unnamed = list(filter(lambda group: not group[0], groups))
-  #
-  #   return '\n\n'.join(filter(None, [format_groups(named), format_groups(unnamed, '\n')]))
 
 module.exports = Sortifier
