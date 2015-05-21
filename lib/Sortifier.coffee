@@ -47,7 +47,6 @@ class Sortifier
 
   sortRequires: (text, prefix) ->
     requires = text.match(REQUIRE_GLOBAL_REGEX)
-    console.log(requires)
     requires.sort (a, b) ->
       aPath = getPath(a)
       bPath = getPath(b)
