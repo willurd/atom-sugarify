@@ -1,4 +1,5 @@
 {CompositeDisposable} = require 'atom'
+_ = require 'lodash'
 
 REQUIRE_REGEX = /(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!])+!)?(.+)['"]\s*\)\s*;?/
 REQUIRE_GLOBAL_REGEX = new RegExp(REQUIRE_REGEX.source, 'g')
@@ -72,8 +73,10 @@ class Sortifier
     groups.sort (a, b) ->
       aGroup = getBaseDirectory(a[0])
       bGroup = getBaseDirectory(b[0])
-      return -1 if aGroup == ':aliased' or aGroup < bGroup
-      return  1 if aGroup == ':unnamed' or aGroup > bGroup
+      return -1 if aGroup == ':aliased' or bGroup == ':unnamed'
+      return  1 if aGroup == ':unnamed' or bGroup == ':aliased'
+      return -1 if aGroup < bGroup
+      return  1 if aGroup > bGroup
       return  0
 
     groups.forEach (group) ->
