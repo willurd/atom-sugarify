@@ -1,21 +1,31 @@
 {CompositeDisposable} = require 'atom'
 
-
-DEFINE_HEADER = '''define(function(require, exports, module) {
-
-'''
-
-STRICT_MODE_DIRECTIVE = '''  'use strict';
-
-'''
-
-# IS_REQUIRE_LINE_REGEX = /^\s*(?P<var>var\s+[^\s]+\s*=\s*)?require\s*\(\s*(?P<quote>['"])(?:(?P<plugin>[^!]+)!)?(?P<path>.+)(?P=quote)\s*\)\s*;?.*$/
-# IS_BLANK_LINE_REGEX = /'^\s*$/
-# DEFINE_SECTION_REGEX = /(?P<prefix>.*)define\(\s*\[\s*(?P<deps>[^\]]+)\s*\]\s*,\s*function\s*\(\s*(?P<vars>[^\)]+)\s*\)\s*{(?P<strictmode>\s*(?P<strictmodequote>['"])use\sstrict(?P=strictmodequote);?)?/<!--  -->
-# DEFINE_SECTION_REGEX = /(.*)define\(\s*\[\s*([^\]]+)\s*\]\s*,\s*function\s*\(\s*([^\)]+)\s*\)\s*{(\s*['"]use\sstrict['"];?)?/
-
-REQUIRE_REGEX = /(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!])+!)?(.+)['"]\s*\)\s*;?/g
+REQUIRE_REGEX = /(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!])+!)?(.+)['"]\s*\)\s*;?/
+REQUIRE_GLOBAL_REGEX = new RegExp(REQUIRE_REGEX.source, 'g')
 REQUIRE_BLOCK_REGEX = new RegExp("(\\s*#{REQUIRE_REGEX.source}\\s*)+", 'm')
+
+getName = (line) ->
+  match = line.match(REQUIRE_REGEX)
+  return match[2] if match
+
+getPath = (line) ->
+  match = line.match(REQUIRE_REGEX)
+  return match[4] if match
+
+getBaseDirectory = (line) ->
+  path = getPath(line)
+  return ':unnamed' if !getName(line)
+  return path.split('/')[0] if path and ~path.indexOf('/')
+  return ':aliased'
+
+groupBy = (array, fn) ->
+  groups = {}
+  array.forEach (item) ->
+    group = fn(item)
+    groups[group] = groups[group] || []
+    groups[group].push(item)
+
+  return Object.keys(groups).map (key) -> groups[key]
 
 module.exports = Sugarify =
   subscriptions: null
@@ -31,10 +41,10 @@ module.exports = Sugarify =
     if editor = atom.workspace.getActiveTextEditor()
       sortifier = new Sortifier()
       text = editor.getText()
-      processedText = sortifier.sortify(text)
+      sortedRequireText = sortifier.sortify(text)
 
-      if processedText
-        editor.setText(processedText)
+      if sortedRequireText
+        editor.setText(sortedRequireText)
 
 class Sortifier
   sortify: (text) ->
@@ -42,24 +52,39 @@ class Sortifier
 
     if requireText
       requireText = requireText.trim()
-      processedText = @processRequireText(requireText) + '\n'
-      return text.replace(requireText, processedText)
+      sortedRequireText = @sortRequires(requireText) # + '\n'
+      return text.replace(requireText, sortedRequireText)
 
   getRequireText: (text) ->
-    console.log REQUIRE_BLOCK_REGEX.source
     match = text.match(REQUIRE_BLOCK_REGEX)
     return match[0] if match
 
-  processRequireText: (text) ->
-    console.log 'processRequireText', text
-    requires = text.match(REQUIRE_REGEX)
-    console.log requires
+  sortRequires: (text) ->
+    requires = text.match(REQUIRE_GLOBAL_REGEX)
+    requires.sort (a, b) ->
+      aPath = getPath(a)
+      bPath = getPath(b)
+      return -1 if (aPath < bPath)
+      return  1 if (aPath > bPath)
+      return  0
 
-  # def process_requires(self, requires):
-  #   """
-  #   Takes a block of text containing calls to `require()` and returns a block of text
-  #   containing sorted calls to `require()`.
-  #   """
+    groups = groupBy requires, getBaseDirectory
+    groups.sort (a, b) ->
+      aGroup = getBaseDirectory(a[0])
+      bGroup = getBaseDirectory(b[0])
+      return -1 if aGroup == ':aliased' or aGroup < bGroup
+      return  1 if aGroup == ':unnamed' or aGroup > bGroup
+      return  0
+
+    groups.forEach (group) ->
+      console.group getBaseDirectory(group[0])
+      group.forEach (item) ->
+        console.log item
+      console.groupEnd()
+
+    return text
+
+
   #   def format_groups(groups, sep = '\n\n'):
   #     return sep.join(map(lambda group: '\n'.join(group[1]), groups))
   #
@@ -67,10 +92,6 @@ class Sortifier
   #     key, lst = item
   #     acc[key] += lst
   #     return acc
-  #
-  #   lines = requires.split('\n')
-  #   lines = list(filter(is_require_line, lines))
-  #   lines.sort(key = require_sort_key)
   #
   #   groups = [(key, list(group)) for key, group in groupby(lines, base_dir_key)]
   #
@@ -82,21 +103,3 @@ class Sortifier
   #   unnamed = list(filter(lambda group: not group[0], groups))
   #
   #   return '\n\n'.join(filter(None, [format_groups(named), format_groups(unnamed, '\n')]))
-
-
-# class Sugarifier
-#   sugarify: (text) ->
-#     {fullMatch, requires, isStrictMode} = @getRequires(text)
-#
-#     if requires
-#       processedRequires = @processRequires(requires)
-#       strictModePart = if is_strict_mode then STRICT_MODE_DIRECTIVE else ''
-#       newContents = DEFINE_HEADER + strictModePart + processedRequires
-#
-#       return newContents
-#
-#   getRequires: (text) ->
-#     match = text.match(DEFINE_SECTION_REGEX)
-#     console.log match
-#
-#     return {fullMatch: null, requires: null, isStrictMode, null}
