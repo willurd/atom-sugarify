@@ -15,7 +15,7 @@ STRICT_MODE_DIRECTIVE = '''  'use strict';
 # DEFINE_SECTION_REGEX = /(.*)define\(\s*\[\s*([^\]]+)\s*\]\s*,\s*function\s*\(\s*([^\)]+)\s*\)\s*{(\s*['"]use\sstrict['"];?)?/
 
 REQUIRE_REGEX = /(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!])+!)?(.+)['"]\s*\)\s*;?/g
-REQUIRE_BLOCK_REGEX = new RegExp("([\s\\n]*#{REQUIRE_REGEX.source}[\s\\n]*)+", 'm')
+REQUIRE_BLOCK_REGEX = new RegExp("(\\s*#{REQUIRE_REGEX.source}\\s*)+", 'm')
 
 module.exports = Sugarify =
   subscriptions: null
@@ -41,31 +41,20 @@ class Sortifier
     requireText = @getRequireText(text)
 
     if requireText
+      requireText = requireText.trim()
       processedText = @processRequireText(requireText) + '\n'
       return text.replace(requireText, processedText)
 
   getRequireText: (text) ->
     console.log REQUIRE_BLOCK_REGEX.source
     match = text.match(REQUIRE_BLOCK_REGEX)
-
-    if match
-      matchText = match[0]
-      requires = matchText.match(REQUIRE_REGEX)
-      console.log requires
+    return match[0] if match
 
   processRequireText: (text) ->
     console.log 'processRequireText', text
+    requires = text.match(REQUIRE_REGEX)
+    console.log requires
 
-  # def get_requires(self, contents):
-  #   """
-  #   Finds and returns the block of text at the top of a document that contains your
-  #   calls to `require()`.
-  #   """
-  #   lines = contents.split('\n')
-  #   rest = dropwhile(lambda line: not is_require_line(line), lines)
-  #   require_section = takewhile(lambda line: is_require_line(line) or is_blank_line(line), rest)
-  #   return list(require_section)
-  #
   # def process_requires(self, requires):
   #   """
   #   Takes a block of text containing calls to `require()` and returns a block of text
