@@ -1,5 +1,4 @@
 {CompositeDisposable} = require 'atom'
-_ = require 'lodash'
 
 REQUIRE_REGEX = /(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!])+!)?(.+)['"]\s*\)\s*;?/
 REQUIRE_GLOBAL_REGEX = new RegExp(REQUIRE_REGEX.source, 'g')
@@ -27,6 +26,9 @@ groupBy = (array, fn) ->
     groups[group].push(item)
 
   return Object.keys(groups).map (key) -> groups[key]
+
+groupFormatter = (group) ->
+  return group.join('\n')
 
 module.exports = Sugarify =
   subscriptions: null
@@ -79,13 +81,13 @@ class Sortifier
       return  1 if aGroup > bGroup
       return  0
 
-    groups.forEach (group) ->
-      console.group getBaseDirectory(group[0])
-      group.forEach (item) ->
-        console.log item
-      console.groupEnd()
+    # groups.forEach (group) ->
+    #   console.group getBaseDirectory(group[0])
+    #   group.forEach (item) ->
+    #     console.log item
+    #   console.groupEnd()
 
-    return text
+    return groups.map(groupFormatter).join('\n\n')
 
 
   #   def format_groups(groups, sep = '\n\n'):
