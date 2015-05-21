@@ -1,6 +1,6 @@
-REQUIRE_REGEX = /(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
+REQUIRE_REGEX = /\s*(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
 REQUIRE_GLOBAL_REGEX = new RegExp(REQUIRE_REGEX.source, 'g')
-REQUIRE_BLOCK_REGEX = new RegExp("(\\s*#{REQUIRE_REGEX.source})+", 'm')
+REQUIRE_BLOCK_REGEX = new RegExp("(#{REQUIRE_REGEX.source})+", 'm')
 
 getName = (line) ->
   match = line.match(REQUIRE_REGEX)
@@ -25,24 +25,29 @@ groupBy = (array, fn) ->
 
   return Object.keys(groups).map (key) -> groups[key]
 
-groupFormatter = (group) ->
-  return group.join('\n')
+entryFormatter = (entry, prefix) ->
+  return prefix + entry.trim()
+
+groupFormatter = (group, prefix) ->
+  return group.map((entry) -> entryFormatter(entry, prefix)).join('\n')
 
 class Sortifier
   sortify: (text) ->
     requireText = @getRequireText(text)
 
     if requireText
+      prefix = requireText.match(/^\s*/)?[0]
       requireText = requireText.trim()
-      sortedRequireText = @sortRequires(requireText) # + '\n'
+      sortedRequireText = @sortRequires(requireText, prefix) # + '\n'
       return text.replace(requireText, sortedRequireText)
 
   getRequireText: (text) ->
     match = text.match(REQUIRE_BLOCK_REGEX)
     return match[0] if match
 
-  sortRequires: (text) ->
+  sortRequires: (text, prefix) ->
     requires = text.match(REQUIRE_GLOBAL_REGEX)
+    console.log(requires)
     requires.sort (a, b) ->
       aPath = getPath(a)
       bPath = getPath(b)
@@ -60,6 +65,8 @@ class Sortifier
       return  1 if aGroup > bGroup
       return  0
 
-    return groups.map(groupFormatter).join('\n\n')
+    sortedText = groups.map((group) -> groupFormatter(group, prefix)).join('\n\n')
+
+    return sortedText.replace(/^\s*/, '')
 
 module.exports = Sortifier
