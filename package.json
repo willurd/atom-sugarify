@@ -1,0 +1,16 @@
+{
+  "name": "sugarify",
+  "main": "./lib/sugarify",
+  "version": "0.0.0",
+  "description": "A short description of your package",
+  "keywords": [],
+  "activationCommands": {
+    "atom-workspace": "sugarify:run"
+  },
+  "repository": "https://github.com/atom/sugarify",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=0.174.0 <2.0.0"
+  },
+  "dependencies": {}
+}

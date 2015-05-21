@@ -1,0 +1,1 @@
+Sugarify = require '../lib/sugarify'
