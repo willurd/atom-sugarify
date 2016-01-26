@@ -5,6 +5,7 @@ const GroupEventForm = require('./GroupEventForm');
 const SaveCancelButtons = require('./SaveCancelButtons');
 const EventType = require('bundles/author-group-events/models/EventType');
 const GroupEvent = require('bundles/author-group-events/models/GroupEvent');
+const {Tester} = require('bundles/author-test/test/Tester');
 const {createGroupEvent, editGroupEvent, deleteGroupEvent} = require('bundles/author-group-events/actions/GroupEventsActions');
 const GroupEventPropTypes = require('bundles/author-group-events/constants/GroupEventPropTypes');
 const EventDetailsMapper = require('bundles/author-group-events/models/eventDetails/EventDetailsMapper');

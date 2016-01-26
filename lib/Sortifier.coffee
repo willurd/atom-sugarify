@@ -1,5 +1,5 @@
 # REQUIRE_REGEX = /\s*(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
-REQUIRE_REGEX = /\s*((var|let|const)\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
+REQUIRE_REGEX = /\s*((var|let|const)\s+{?\s*([^\s]+)\s*}?\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
 # REQUIRE_REGEX = /\s*(var|let|const\s+\{?\s*([^\s]+\s*,\s*?)+\s*\}?\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
 REQUIRE_GLOBAL_REGEX = new RegExp(REQUIRE_REGEX.source, 'g')
 REQUIRE_BLOCK_REGEX = new RegExp("(#{REQUIRE_REGEX.source})+", 'm')
