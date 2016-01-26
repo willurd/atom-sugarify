@@ -40,7 +40,7 @@ class Sortifier
     if requireText
       [..., prefix] = requireText.match(/^\s*/)?[0]?.split('\n')
       requireText = requireText.trim()
-      sortedRequireText = @sortRequires(requireText, prefix) # + '\n'
+      sortedRequireText = @sortRequires(requireText, prefix) + '\n'
       return text.replace(requireText, sortedRequireText)
 
   getRequireText: (text) ->

@@ -11,4 +11,5 @@ const GroupEventPropTypes = require('bundles/author-group-events/constants/Group
 const EventDetailsMapper = require('bundles/author-group-events/models/eventDetails/EventDetailsMapper');
 const CMLUtils = require('bundles/phoenix/utils/CMLUtils');
 const _t = require('i18n!nls/groups');
+const { DropdownButton, MenuItem } = require('react-bootstrap');
 const React = require('react-with-addons');
