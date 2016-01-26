@@ -1,1 +1,1 @@
-Sugarify = require '../lib/sugarify'
+Sugarifier = require '../lib/Sugarifier'

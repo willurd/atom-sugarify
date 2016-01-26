@@ -1,14 +1,16 @@
-REQUIRE_REGEX = /\s*(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
+# REQUIRE_REGEX = /\s*(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
+REQUIRE_REGEX = /\s*((var|let|const)\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
+# REQUIRE_REGEX = /\s*(var|let|const\s+\{?\s*([^\s]+\s*,\s*?)+\s*\}?\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
 REQUIRE_GLOBAL_REGEX = new RegExp(REQUIRE_REGEX.source, 'g')
 REQUIRE_BLOCK_REGEX = new RegExp("(#{REQUIRE_REGEX.source})+", 'm')
 
 getName = (line) ->
   match = line.match(REQUIRE_REGEX)
-  return match[2] if match
+  return match[3] if match
 
 getPath = (line) ->
   match = line.match(REQUIRE_REGEX)
-  return match[4] if match
+  return match[5] if match
 
 getBaseDirectory = (line) ->
   path = getPath(line)
@@ -43,10 +45,12 @@ class Sortifier
 
   getRequireText: (text) ->
     match = text.match(REQUIRE_BLOCK_REGEX)
+    console.debug('getRequireText', match)
     return match[0] if match
 
   sortRequires: (text, prefix) ->
     requires = text.match(REQUIRE_GLOBAL_REGEX)
+    console.debug('sortRequires', requires)
     requires.sort (a, b) ->
       aPath = getPath(a)
       bPath = getPath(b)

@@ -1,7 +1,7 @@
 {CompositeDisposable} = require 'atom'
 Sortifier = require './Sortifier'
 
-module.exports = Sugarify =
+module.exports = Sugarifier =
   subscriptions: null
 
   activate: (state) ->
