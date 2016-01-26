@@ -1,5 +1,5 @@
 REQUIRE_REGEX = ///
-  \s*
+  \s*?
 
   # Optional:
   #   `const something = `
@@ -68,23 +68,27 @@ groupFormatter = (group, prefix) ->
   return group.map((entry) -> entryFormatter(entry, prefix)).join('\n')
 
 class Sortifier
-  sortify: (text) ->
-    requireText = @getRequireText(text)
+  sortify: (editor) ->
+    buffer = editor.buffer
 
-    if requireText
+    editor.scanInBufferRange REQUIRE_BLOCK_REGEX, buffer.getRange(), ({range}) =>
+      requireText = buffer.getTextInRange(range)
+      return if not requireText
+
       [..., prefix] = requireText.match(/^\s*/)?[0]?.split('\n')
+      openingWhitespace = requireText.match(/^\s*/)[0]
       requireText = requireText.trim()
       sortedRequireText = @sortRequires(requireText, prefix)
-      return text.replace(requireText, sortedRequireText)
+      return if not sortedRequireText
+
+      buffer.setTextInRange(range, openingWhitespace + sortedRequireText)
 
   getRequireText: (text) ->
     match = text.match(REQUIRE_BLOCK_REGEX)
-    console.debug('getRequireText', match)
     return match[0] if match
 
   sortRequires: (text, prefix) ->
     requires = text.match(REQUIRE_GLOBAL_REGEX)
-    console.debug('sortRequires', requires)
     requires.sort (a, b) ->
       aPath = getPath(a)
       bPath = getPath(b)

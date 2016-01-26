@@ -2,11 +2,10 @@
 
 var origami =
   require('js/app/origamiSingleton.v0-0-1');
-
-require('hallo');
-
 var multitracker
   = require('js/app/multitrackerSingleton.v0-0-1');
+
+require('hallo');
 
 class Stuff {
   constructor() {}

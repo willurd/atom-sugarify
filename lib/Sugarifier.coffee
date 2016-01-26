@@ -14,8 +14,4 @@ module.exports = Sugarifier =
   run: ->
     if editor = atom.workspace.getActiveTextEditor()
       sortifier = new Sortifier()
-      text = editor.getText()
-      sortedRequireText = sortifier.sortify(text)
-
-      if sortedRequireText
-        editor.setText(sortedRequireText)
+      sortifier.sortify(editor)
