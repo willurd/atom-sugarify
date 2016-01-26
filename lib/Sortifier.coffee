@@ -1,6 +1,40 @@
-# REQUIRE_REGEX = /\s*(var\s+([^\s]+)\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
-REQUIRE_REGEX = /\s*((var|let|const)\s+{?\s*([^\s]+)\s*}?\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
-# REQUIRE_REGEX = /\s*(var|let|const\s+\{?\s*([^\s]+\s*,\s*?)+\s*\}?\s*=\s*)?require\s*\(\s*['"](?:([^!\n'"]+)!)?(.+)['"]\s*\)\s*;?/
+REQUIRE_REGEX = ///
+  \s*
+
+  # Optional:
+  #   `const something = `
+  #   `const {one, two, three} = `
+  (
+    (var|let|const)
+    \s+
+    {?
+      \s*
+      ([$_a-zA-Z0-9]+)
+      (\s*,\s*([$_a-zA-Z0-9]+))*
+      \s*
+    }?
+    \s*
+    =
+    \s*
+  )?
+
+  # Required:
+  #   require('path/to/module')
+  #   require('json!path/to/json/module')
+  require
+  \s*
+  \(
+    \s*
+    ['"]
+    (?:([^!\n'"]+)!)?
+    (.+)
+    ['"]
+    \s*
+  \)
+  \s*
+  ;?
+///
+
 REQUIRE_GLOBAL_REGEX = new RegExp(REQUIRE_REGEX.source, 'g')
 REQUIRE_BLOCK_REGEX = new RegExp("(#{REQUIRE_REGEX.source})+", 'm')
 
@@ -10,7 +44,7 @@ getName = (line) ->
 
 getPath = (line) ->
   match = line.match(REQUIRE_REGEX)
-  return match[5] if match
+  return match[7] if match
 
 getBaseDirectory = (line) ->
   path = getPath(line)
@@ -40,7 +74,7 @@ class Sortifier
     if requireText
       [..., prefix] = requireText.match(/^\s*/)?[0]?.split('\n')
       requireText = requireText.trim()
-      sortedRequireText = @sortRequires(requireText, prefix) + '\n'
+      sortedRequireText = @sortRequires(requireText, prefix)
       return text.replace(requireText, sortedRequireText)
 
   getRequireText: (text) ->
