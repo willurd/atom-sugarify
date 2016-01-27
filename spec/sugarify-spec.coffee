@@ -1,1 +1,0 @@
-Sugarifier = require '../lib/Sugarifier'
